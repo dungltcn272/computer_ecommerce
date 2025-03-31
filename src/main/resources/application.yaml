@@ -1,0 +1,16 @@
+ktor:
+  application:
+    modules:
+      - com.ltcn272.ApplicationKt.module
+  deployment:
+    port: 8080
+app:
+  baseUrl: "http://localhost:8080"
+security:
+  apiKey: "YOUR_SECRET_API_KEY"
+  secretPasswordKey: "your_secure_secret_key"
+jwt:
+  domain: "https://jwt-provider-domain/"
+  audience: "jwt-audience"
+  realm: "ktor sample app"
+  secret: "secret"
