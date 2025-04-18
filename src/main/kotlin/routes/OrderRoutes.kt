@@ -15,6 +15,7 @@ import io.ktor.server.routing.*
 import java.util.*
 
 fun Route.orderRoutes(orderService: OrderService) {
+
     vnPayReturnRoutes(orderService, VNPayGateway.vnpTmnCode)
     route("/orders") {
         post {
@@ -24,7 +25,9 @@ fun Route.orderRoutes(orderService: OrderService) {
             val isSuccess = orderService.createOrder(userId, orderRequest)
 
             if (isSuccess) {
-                call.respond(HttpStatusCode.Created, mapOf("message" to "Order created successfully"))
+                call.respond(
+                    HttpStatusCode.Created, mapOf("message" to "Order created successfully")
+                )
             } else {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to create order"))
             }
@@ -104,6 +107,7 @@ fun Route.orderRoutes(orderService: OrderService) {
                     val response = orderService.processCODPayment(orderId)
                     call.respond(HttpStatusCode.OK, response)
                 }
+
                 "VNPAY" -> {
                     val order = orderService.getOrderById(orderId, userId)
                     if (order == null) {
@@ -112,9 +116,13 @@ fun Route.orderRoutes(orderService: OrderService) {
                     }
                     val clientIp = call.request.origin.remoteHost
                     val paymentUrl = orderService.processVNPayPayment(orderId, order.totalPrice, clientIp)
-                    println(paymentUrl)
                     call.respond(HttpStatusCode.OK, mapOf("paymentUrl" to paymentUrl))
                 }
+
+                "VietQR" -> {
+
+                }
+
                 else -> call.respond(HttpStatusCode.BadRequest, "Invalid payment method")
             }
         }

@@ -22,7 +22,7 @@ import kotlinx.serialization.json.Json
 fun Application.configureRouting() {
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            call.respondText(text = "500: $cause" , status = HttpStatusCode.InternalServerError)
+            call.respondText(text = "500: ${cause.message}" , status = HttpStatusCode.InternalServerError)
         }
         exception<IllegalArgumentException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, cause.message ?: "Invalid request")
@@ -37,11 +37,13 @@ fun Application.configureRouting() {
         val userRepository = UserRepositoryImpl()
         val authService = AuthService(userRepository)
         authRoutes(authService, client)
+        val productService = ProductService(ProductRepositoryImpl(), userRepository)
+        productRoutesPublic(productService)
         get { call.respond("Hello Dung") }
         authenticate("auth-jwt", "auth-oauth-google") {
             userRoutes(UserService(userRepository))
-            productRoutes(ProductService(ProductRepositoryImpl(), userRepository))
             categoryRoutes(CategoryService(CategoryRepositoryImpl()))
+            productRoutesForAdmin(productService)
             cartRoute(CartService(CartRepositoryImpl()))
             orderRoutes(OrderService(OrderRepositoryImpl()))
         }

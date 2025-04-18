@@ -9,19 +9,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.request.*
 import kotlinx.serialization.json.Json
-import java.io.File
 import java.util.UUID
 
-fun Route.productRoutes(productService: ProductService) {
+fun Route.productRoutesForAdmin(productService: ProductService) {
     route("/products") {
-        get {
-            try {
-                val products = productService.getAllProducts()
-                call.respond(HttpStatusCode.OK, products)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Error getting products: ${e.message}")
-            }
-        }
         post {
             val adminId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
             val multipartData = call.receiveMultipart()
@@ -62,23 +53,13 @@ fun Route.productRoutes(productService: ProductService) {
             call.respond(HttpStatusCode.Created, "Product created with ID: $productId")
 
         }
-        get("/{id}") {
-            val productId = call.parameters["id"]?.toLongOrNull()
-            if (productId != null) {
-                val product = productService.getProductById(productId)
-                if (product != null) {
-                    call.respond(product)
-                } else {
-                    call.respond(HttpStatusCode.NotFound, "Product not found")
-                }
-            } else {
-                call.respond(HttpStatusCode.BadRequest, "Invalid product ID")
-            }
-        }
         put("/{id}") {
             val adminId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
+            println(adminId)
             val productId = call.parameters["id"]?.toLongOrNull()
+            println(productId)
             val productRequest = call.receive<ProductRequest>()
+            println(productRequest)
             if (productId != null) {
                 val updated = productService.updateProduct(adminId, productId, productRequest)
                 if (updated) {
@@ -116,22 +97,6 @@ fun Route.productRoutes(productService: ProductService) {
                 }
             } else {
                 call.respond(HttpStatusCode.BadRequest, "Invalid product ID")
-            }
-        }
-        get("/media/{filename}") {
-            val fileName = call.parameters["filename"]
-            if (fileName != null) {
-                val filePath = "uploads/products/$fileName"
-                val file = File(filePath)
-                println(filePath)
-
-                if (file.exists()) {
-                    call.respondFile(file)
-                } else {
-                    call.respond(HttpStatusCode.NotFound, "File not found")
-                }
-            } else {
-                call.respond(HttpStatusCode.BadRequest, "Invalid parameters")
             }
         }
     }
