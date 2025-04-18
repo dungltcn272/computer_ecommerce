@@ -14,15 +14,12 @@ import java.io.File
 import java.util.UUID
 
 class ProductService(private val productRepository: ProductRepository, private val userRepository: UserRepository) {
-    suspend fun getAllProducts(): List<ProductResponse> {
-        return productRepository.getAllProducts()
-    }
 
     suspend fun getProductById(productId: Long): ProductResponse? {
         return productRepository.getProductById(productId)
     }
 
-    suspend fun createProduct(userId : UUID, product: ProductRequest): Long {
+    suspend fun createProduct(userId: UUID, product: ProductRequest): Long {
         if (!userRepository.isAdmin(userId)) {
             throw IllegalAccessException("Bạn không có quyền thêm sản phẩm")
         }
@@ -86,31 +83,32 @@ class ProductService(private val productRepository: ProductRepository, private v
 
         return productRepository.addProductMedia(productMedia)
     }
-    private suspend fun isAdmin(userId: UUID) : Boolean {
+
+    private suspend fun isAdmin(userId: UUID): Boolean {
         if (userRepository.isAdmin(userId)) {
             return true
-        }else {
+        } else {
             throw IllegalAccessException("Bạn không có quyền thực hiện hành động này")
         }
     }
 
-    suspend fun getProductsPaginated(
-        page: Int,
-        limit: Int,
+    suspend fun getProducts(
+        page: Int?,
+        limit: Int?,
         category: String?,
         sortBy: String?,
         order: String?,
         search: String?
     ): List<ProductResponse> {
-        if (page < 1) throw IllegalArgumentException("Page must be at least 1")
-        if (limit < 1 || limit > 100) throw IllegalArgumentException("Limit must be between 1 and 100")
+        if (page != null && page < 1) throw IllegalArgumentException("Page must be at least 1")
+        if (limit != null && (limit < 1 || limit > 100)) throw IllegalArgumentException("Limit must be between 1 and 100")
         if (sortBy != null && sortBy !in listOf("price", "name", "created_at")) {
             throw IllegalArgumentException("SortBy must be price, name, or created_at")
         }
         if (order != null && order !in listOf("asc", "desc")) {
             throw IllegalArgumentException("Order must be asc or desc")
         }
-        return productRepository.getProductsPaginated(page, limit, category, sortBy, order, search)
+        return productRepository.getProducts(page, limit, category, sortBy, order, search)
     }
 
 }

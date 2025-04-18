@@ -1,6 +1,8 @@
 package com.ltcn272.routes
 
 import com.ltcn272.config.AppConfig.BASE_URL
+import com.ltcn272.data.model.RegisterRequest
+import com.ltcn272.data.model.User
 import com.ltcn272.data.model.UserAddress
 import com.ltcn272.services.UserService
 import io.ktor.http.*
@@ -20,6 +22,31 @@ fun Route.userRoutes(userService: UserService) {
             call.respond(HttpStatusCode.OK, users)
         } else {
             call.respond(HttpStatusCode.NotFound, "No users found")
+        }
+    }
+    post("/users") {
+        val adminId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
+        val newUser = call.receive<User>()
+        val userId = userService.createUser(newUser, adminId)
+        if (userId != null) {
+            call.respond(HttpStatusCode.Created, "User created with ID: $userId")
+        } else {
+            call.respond(HttpStatusCode.InternalServerError, "Failed to create user")
+        }
+    }
+    delete("users/{id}") {
+        val adminId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
+        val userId = call.parameters["id"]
+        if (userId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+            return@delete
+        }
+        val uuid = UUID.fromString(userId)
+        val deleted = userService.deleteUser(uuid, adminId)
+        if (deleted) {
+            call.respond(HttpStatusCode.OK, "User deleted successfully")
+        } else {
+            call.respond(HttpStatusCode.NotFound, "User not found")
         }
     }
     route("/user") {

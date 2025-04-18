@@ -23,4 +23,16 @@ class UserService(private val userRepository: UserRepository) {
         if (userRepository.isAdmin(adminId))
             return userRepository.getAllUsers() else throw Exception("You are not admin")
     }
+    suspend fun deleteUser(userId: UUID, adminId: UUID): Boolean {
+        if (userRepository.isAdmin(adminId))
+            return userRepository.deleteUser(userId) else throw Exception("You are not admin")
+    }
+
+    suspend fun createUser(user: User, adminId: UUID): User? {
+        if (userRepository.isAdmin(adminId)) {
+            return userRepository.createUser(user)
+        } else {
+            throw Exception("You are not admin")
+        }
+    }
 }

@@ -78,7 +78,6 @@ class UserRepositoryImpl : UserRepository {
             .singleOrNull() == "ADMIN"
     }
 
-    // Cập nhật địa chỉ người dùng
     override suspend fun updateAddress(userId: UUID, address: UserAddress): Boolean = transaction {
         val updatedRows =
             UserAddresses.update({ UserAddresses.id eq address.id!! and (UserAddresses.userId eq userId) }) {
@@ -91,14 +90,12 @@ class UserRepositoryImpl : UserRepository {
         updatedRows > 0
     }
 
-    // Xóa một địa chỉ của người dùng
     override suspend fun removeAddress(userId: UUID, addressId: Long): Boolean = transaction {
         val deletedRows =
             UserAddresses.deleteWhere { UserAddresses.id eq addressId and (UserAddresses.userId eq userId) }
         deletedRows > 0
     }
 
-    // Lấy tất cả địa chỉ của người dùng
     override suspend fun findAddressByUserId(userId: UUID): List<UserAddress> = transaction {
         UserAddresses.selectAll().where { UserAddresses.userId eq userId }
             .map { row ->
@@ -112,6 +109,11 @@ class UserRepositoryImpl : UserRepository {
                     postalCode = row[UserAddresses.postalCode]
                 )
             }
+    }
+
+    override suspend fun deleteUser(userId: UUID): Boolean = transaction {
+        UserAddresses.deleteWhere { UserAddresses.userId eq userId }
+        Users.deleteWhere { Users.id eq userId } > 0
     }
 
 }

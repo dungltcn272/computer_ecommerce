@@ -11,18 +11,17 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ProductRepositoryImpl : ProductRepository {
-    override suspend fun getProductsPaginated(
-        page: Int,
-        limit: Int,
+    override suspend fun getProducts(
+        page: Int?,
+        limit: Int?,
         category: String?,
         sortBy: String?,
         order: String?,
         search: String?
-    ): List<ProductResponse> = transaction{
-        val validPage = maxOf(1, page)
-        val validLimit = maxOf(1, limit)
-        val offset = ((validPage - 1) * validLimit).toLong()
+    ): List<ProductResponse> = transaction {
+        val productMap = mutableMapOf<Long, ProductResponse>()
 
+        // Build the base query
         var query = (Products leftJoin Categories)
             .select(
                 Products.id,
@@ -36,6 +35,7 @@ class ProductRepositoryImpl : ProductRepository {
                 Products.createdAt
             )
 
+        // Apply filters
         if (!category.isNullOrBlank()) {
             query = query.andWhere { Categories.name eq category }
         }
@@ -44,7 +44,7 @@ class ProductRepositoryImpl : ProductRepository {
             query = query.andWhere { Products.name like "%$search%" }
         }
 
-        // Sắp xếp
+        // Apply sorting
         if (!sortBy.isNullOrBlank()) {
             val column = when (sortBy.lowercase()) {
                 "price" -> Products.price
@@ -57,18 +57,23 @@ class ProductRepositoryImpl : ProductRepository {
             } else {
                 query.orderBy(column to SortOrder.ASC)
             }
-        }
-
-        query = if (order?.lowercase() == "desc") {
-            query.orderBy(Products.id to SortOrder.DESC)
         } else {
-            query.orderBy(Products.id to SortOrder.ASC)
+            query = if (order?.lowercase() == "desc") {
+                query.orderBy(Products.id to SortOrder.DESC)
+            } else {
+                query.orderBy(Products.id to SortOrder.ASC)
+            }
         }
 
-        query = query.limit(validLimit).offset(offset)
+        // Apply pagination if provided
+        if (page != null && limit != null) {
+            val validPage = maxOf(1, page)
+            val validLimit = maxOf(1, limit)
+            val offset = ((validPage - 1) * validLimit).toLong()
+            query = query.limit(validLimit).offset(offset)
+        }
 
-        // Lấy sản phẩm và media
-        val productMap = mutableMapOf<Long, ProductResponse>()
+        // Fetch product details
         query.forEach { row ->
             val productId = row[Products.id]
             productMap[productId] = ProductResponse(
@@ -85,45 +90,19 @@ class ProductRepositoryImpl : ProductRepository {
             )
         }
 
+        // Fetch product media
         if (productMap.isNotEmpty()) {
             ProductMedias
-                .selectAll().where { ProductMedias.productId inList productMap.keys }
+                .selectAll()
+                .where { ProductMedias.productId inList productMap.keys }
                 .orderBy(ProductMedias.id to SortOrder.ASC)
                 .forEach { mediaRow ->
                     val productId = mediaRow[ProductMedias.productId]
                     productMap[productId]?.listMedia?.add(mediaRow[ProductMedias.url])
                 }
         }
+
         productMap.values.toList()
-    }
-
-
-    override suspend fun getAllProducts(): List<ProductResponse> = transaction {
-        val productMap = mutableMapOf<Long, ProductResponse>()
-
-        (Products leftJoin Categories leftJoin ProductMedias)
-            .selectAll()
-            .forEach { row ->
-                val productId = row[Products.id]
-                val mediaUrl = row[ProductMedias.url]
-                val product = productMap.getOrPut(productId) {
-                    ProductResponse(
-                        id = productId,
-                        name = row[Products.name],
-                        description = row[Products.description],
-                        price = row[Products.price],
-                        discount = row[Products.discount],
-                        stockQuantity = row[Products.stockQuantity],
-                        category = row[Categories.name],
-                        brand = row[Products.brand],
-                        createdAt = row[Products.createdAt],
-                        listMedia = mutableListOf()
-                    )
-                }
-                (product.listMedia).add(mediaUrl)
-            }
-
-        return@transaction productMap.values.toList()
     }
 
     override suspend fun getProductById(productId: Long): ProductResponse? = transaction {
@@ -171,8 +150,8 @@ class ProductRepositoryImpl : ProductRepository {
 
     override suspend fun deleteProduct(productId: Long): Boolean {
         return transaction {
-            ProductMedias.deleteWhere { ProductMedias.productId eq id }
-            Products.deleteWhere { Products.id eq id } > 0
+            ProductMedias.deleteWhere { ProductMedias.productId eq productId }
+            Products.deleteWhere { Products.id eq productId } > 0
         }
     }
 
