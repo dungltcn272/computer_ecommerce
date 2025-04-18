@@ -10,7 +10,6 @@ import io.ktor.http.content.*
 import io.ktor.utils.io.*
 import kotlinx.io.readByteArray
 import java.io.File
-
 import java.util.UUID
 
 class ProductService(private val productRepository: ProductRepository, private val userRepository: UserRepository) {

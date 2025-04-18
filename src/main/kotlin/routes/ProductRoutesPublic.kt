@@ -21,7 +21,7 @@ fun Route.productRoutesPublic(productService: ProductService) {
 
                 val response = productService.getProducts(
                     page = page,
-                    limit = limit,
+                    limit = limit ?: 20,
                     category = category,
                     sortBy = sortBy,
                     order = order,
