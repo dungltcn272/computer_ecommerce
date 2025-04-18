@@ -124,7 +124,7 @@ fun Route.orderRoutes(orderService: OrderService) {
 
                 // Tạo link thanh toán
                 val paymentResponse = PayOSGateway.createPaymentLink(
-                    orderCode = 100001,
+                    orderCode = orderId,
                     amount = amount,
                     description = "Thanh toán đơn hàng #$orderId",
                     returnUrl = "$BASE_URL/success?orderId=$orderId",
