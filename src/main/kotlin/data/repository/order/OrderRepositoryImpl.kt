@@ -75,8 +75,8 @@ class OrderRepositoryImpl : OrderRepository {
             }.singleOrNull()
     }
 
-    override suspend fun updateOrderStatus(orderId: Long, userId: UUID, status: String, reason: String?): Boolean = transaction {
-        val updatedRows = Orders.update({ (Orders.id eq orderId) and (Orders.userId eq userId) }) {
+    override suspend fun updateOrderStatus(orderId: Long, status: String, reason: String?): Boolean = transaction {
+        val updatedRows = Orders.update({ (Orders.id eq orderId) }) {
             it[Orders.status] = status
             if (status == "CANCELLED") {
                 it[Orders.cancellationReason] = reason
@@ -84,6 +84,8 @@ class OrderRepositoryImpl : OrderRepository {
         }
         return@transaction updatedRows > 0
     }
+
+
     private fun getOrderItems(orderId: Long): List<OrderItemResponse> {
         return OrderItems.selectAll().where { OrderItems.orderId eq orderId }
             .map { row ->

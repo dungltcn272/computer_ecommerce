@@ -8,7 +8,7 @@ interface OrderRepository {
     suspend fun createOrder(userId: UUID, items: List<OrderItemRequest>): Boolean
     suspend fun getOrdersByUser(userId: UUID): List<OrderResponse>
     suspend fun getOrderById(orderId: Long, userId: UUID): OrderResponse?
-    suspend fun updateOrderStatus(orderId: Long, userId: UUID, status: String, reason: String?): Boolean
+    suspend fun updateOrderStatus(orderId: Long, status: String, reason: String?): Boolean
     suspend fun cancelOrder(orderId: Long, userId: UUID, reason: String?): Boolean
     suspend fun updatePaymentStatus(orderId: Long, paymentStatus: String): Boolean
 }
