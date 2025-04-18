@@ -10,6 +10,7 @@ import io.ktor.http.content.*
 import io.ktor.utils.io.*
 import kotlinx.io.readByteArray
 import java.io.File
+
 import java.util.UUID
 
 class ProductService(private val productRepository: ProductRepository, private val userRepository: UserRepository) {
@@ -92,4 +93,24 @@ class ProductService(private val productRepository: ProductRepository, private v
             throw IllegalAccessException("Bạn không có quyền thực hiện hành động này")
         }
     }
+
+    suspend fun getProductsPaginated(
+        page: Int,
+        limit: Int,
+        category: String?,
+        sortBy: String?,
+        order: String?,
+        search: String?
+    ): List<ProductResponse> {
+        if (page < 1) throw IllegalArgumentException("Page must be at least 1")
+        if (limit < 1 || limit > 100) throw IllegalArgumentException("Limit must be between 1 and 100")
+        if (sortBy != null && sortBy !in listOf("price", "name", "created_at")) {
+            throw IllegalArgumentException("SortBy must be price, name, or created_at")
+        }
+        if (order != null && order !in listOf("asc", "desc")) {
+            throw IllegalArgumentException("Order must be asc or desc")
+        }
+        return productRepository.getProductsPaginated(page, limit, category, sortBy, order, search)
+    }
+
 }

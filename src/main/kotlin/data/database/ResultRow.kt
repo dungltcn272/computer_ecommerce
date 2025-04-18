@@ -1,6 +1,7 @@
 package com.ltcn272.data.database
 
 import com.ltcn272.data.model.Category
+import com.ltcn272.data.model.ProductResponse
 import com.ltcn272.data.model.User
 import org.jetbrains.exposed.sql.ResultRow
 

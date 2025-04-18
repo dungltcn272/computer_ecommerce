@@ -11,6 +11,93 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ProductRepositoryImpl : ProductRepository {
+    override suspend fun getProductsPaginated(
+        page: Int,
+        limit: Int,
+        category: String?,
+        sortBy: String?,
+        order: String?,
+        search: String?
+    ): List<ProductResponse> = transaction{
+        val validPage = maxOf(1, page)
+        val validLimit = maxOf(1, limit)
+        val offset = ((validPage - 1) * validLimit).toLong()
+
+        var query = (Products leftJoin Categories)
+            .select(
+                Products.id,
+                Products.name,
+                Products.description,
+                Products.price,
+                Products.discount,
+                Products.stockQuantity,
+                Categories.name,
+                Products.brand,
+                Products.createdAt
+            )
+
+        if (!category.isNullOrBlank()) {
+            query = query.andWhere { Categories.name eq category }
+        }
+
+        if (!search.isNullOrBlank()) {
+            query = query.andWhere { Products.name like "%$search%" }
+        }
+
+        // Sắp xếp
+        if (!sortBy.isNullOrBlank()) {
+            val column = when (sortBy.lowercase()) {
+                "price" -> Products.price
+                "name" -> Products.name
+                "created_at" -> Products.createdAt
+                else -> Products.id
+            }
+            query = if (order?.lowercase() == "desc") {
+                query.orderBy(column to SortOrder.DESC)
+            } else {
+                query.orderBy(column to SortOrder.ASC)
+            }
+        }
+
+        query = if (order?.lowercase() == "desc") {
+            query.orderBy(Products.id to SortOrder.DESC)
+        } else {
+            query.orderBy(Products.id to SortOrder.ASC)
+        }
+
+        query = query.limit(validLimit).offset(offset)
+
+        // Lấy sản phẩm và media
+        val productMap = mutableMapOf<Long, ProductResponse>()
+        query.forEach { row ->
+            val productId = row[Products.id]
+            productMap[productId] = ProductResponse(
+                id = productId,
+                name = row[Products.name],
+                description = row[Products.description],
+                price = row[Products.price],
+                discount = row[Products.discount],
+                stockQuantity = row[Products.stockQuantity],
+                category = row.getOrNull(Categories.name),
+                brand = row[Products.brand],
+                createdAt = row[Products.createdAt],
+                listMedia = mutableListOf()
+            )
+        }
+
+        if (productMap.isNotEmpty()) {
+            ProductMedias
+                .selectAll().where { ProductMedias.productId inList productMap.keys }
+                .orderBy(ProductMedias.id to SortOrder.ASC)
+                .forEach { mediaRow ->
+                    val productId = mediaRow[ProductMedias.productId]
+                    productMap[productId]?.listMedia?.add(mediaRow[ProductMedias.url])
+                }
+        }
+        productMap.values.toList()
+    }
+
+
     override suspend fun getAllProducts(): List<ProductResponse> = transaction {
         val productMap = mutableMapOf<Long, ProductResponse>()
 
@@ -33,9 +120,7 @@ class ProductRepositoryImpl : ProductRepository {
                         listMedia = mutableListOf()
                     )
                 }
-                println(mediaUrl)
                 (product.listMedia).add(mediaUrl)
-                println(product.listMedia)
             }
 
         return@transaction productMap.values.toList()

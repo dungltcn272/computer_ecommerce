@@ -11,10 +11,36 @@ fun Route.productRoutesPublic(productService: ProductService) {
     route("/products") {
         get {
             try {
-                val products = productService.getAllProducts()
-                call.respond(HttpStatusCode.OK, products)
+                val queryParameters = call.request.queryParameters
+                if (queryParameters.isEmpty()) {
+                    val products = productService.getAllProducts()
+                    call.respond(HttpStatusCode.OK, products)
+                } else {
+                    println("GetProductsPaginated")
+                    val page = queryParameters["page"]?.toIntOrNull() ?: 1
+                    val limit = queryParameters["limit"]?.toIntOrNull() ?: 20
+                    val category = queryParameters["category"]
+                    val sortBy = queryParameters["sortBy"]
+                    val order = queryParameters["order"]
+                    val search = queryParameters["search"]
+
+                    val response = productService.getProductsPaginated(
+                        page = page,
+                        limit = limit,
+                        category = category,
+                        sortBy = sortBy,
+                        order = order,
+                        search = search
+                    )
+                    call.respond(HttpStatusCode.OK, response)
+                }
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Error getting products: ${e.message}")
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to "Error getting products: ${e.message}")
+                )
             }
         }
         get("/{id}") {

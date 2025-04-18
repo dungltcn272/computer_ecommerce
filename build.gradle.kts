@@ -42,4 +42,5 @@ dependencies {
     implementation(libs.mysql.connector.java)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.content.negotiation)
+    implementation("io.ktor:ktor-server-cors:")
 }
