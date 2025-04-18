@@ -50,6 +50,11 @@ fun Route.userRoutes(userService: UserService) {
         }
     }
     route("/user") {
+        get("{id}/address") {
+            val userId = UUID.fromString(call.parameters["id"])
+            val address = userService.getAddress(userId)
+            call.respond(HttpStatusCode.OK, address)
+        }
         put("/avatar") {
             val userId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
             val multipartData = call.receiveMultipart()

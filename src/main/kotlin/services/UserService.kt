@@ -11,6 +11,10 @@ class UserService(private val userRepository: UserRepository) {
         return userRepository.updateAvatar(userId, avatarUrl)
     }
 
+    suspend fun getAddress(userId: UUID): List<UserAddress> {
+        return userRepository.findAddressByUserId(userId)
+    }
+
     suspend fun updateAddress(userId: UUID, address: UserAddress): Boolean {
         return userRepository.updateAddress(userId, address)
     }

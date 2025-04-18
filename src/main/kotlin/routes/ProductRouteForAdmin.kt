@@ -34,7 +34,6 @@ fun Route.productRoutesForAdmin(productService: ProductService) {
 
                     is PartData.FileItem -> {
                         val fileUrl = productService.addProductMediaFile(adminId, part)
-                        println(fileUrl)
                         fileUrl?.let { fileUrls.add(it) }
                     }
 
