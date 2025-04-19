@@ -51,7 +51,14 @@ fun Route.userRoutes(userService: UserService) {
     }
     route("/user") {
         get("{id}/address") {
+            val adminId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
             val userId = UUID.fromString(call.parameters["id"])
+            val address = userService.adminGetUserAddress(userId, adminId)
+            call.respond(HttpStatusCode.OK, address)
+        }
+
+        get("/address") {
+            val userId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
             val address = userService.getAddress(userId)
             call.respond(HttpStatusCode.OK, address)
         }

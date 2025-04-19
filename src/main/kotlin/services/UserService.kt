@@ -15,6 +15,11 @@ class UserService(private val userRepository: UserRepository) {
         return userRepository.findAddressByUserId(userId)
     }
 
+    suspend fun adminGetUserAddress(userId: UUID, adminId: UUID): List<UserAddress> {
+        if (userRepository.isAdmin(adminId))
+            return userRepository.findAddressByUserId(userId) else throw Exception("You are not admin")
+    }
+
     suspend fun updateAddress(userId: UUID, address: UserAddress): Boolean {
         return userRepository.updateAddress(userId, address)
     }

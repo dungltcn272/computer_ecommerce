@@ -1,7 +1,5 @@
 package com.ltcn272.routes
 
-import com.ltcn272.config.PayOSGateway
-import com.ltcn272.data.model.WebhookData
 import com.ltcn272.data.model.WebhookResponse
 import com.ltcn272.services.OrderService
 import io.ktor.http.*
@@ -10,7 +8,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 
 fun Route.configurePayOSCallbackRoutes(orderService: OrderService) {
     post("/payment/callback") {
