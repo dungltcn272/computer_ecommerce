@@ -116,4 +116,15 @@ class UserRepositoryImpl : UserRepository {
         Users.deleteWhere { Users.id eq userId } > 0
     }
 
+    override suspend fun updateUser(userId: UUID, fullName: String?, phone: String?): Boolean =
+        transaction {
+            Users.update({ Users.id eq userId }) {
+                if (fullName != null) {
+                    it[Users.fullName] = fullName
+                }
+                if (phone != null) {
+                    it[Users.phone] = phone
+                }
+            } > 0
+        }
 }

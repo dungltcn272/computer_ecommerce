@@ -21,4 +21,9 @@ interface UserRepository {
     suspend fun findAddressByUserId(userId: UUID): List<UserAddress>
 
     suspend fun deleteUser(userId: UUID): Boolean
+    suspend fun updateUser(
+        userId: UUID,
+        fullName: String?,
+        phone: String?
+    ): Boolean
 }

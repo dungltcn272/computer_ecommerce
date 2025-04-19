@@ -1,5 +1,6 @@
 package com.ltcn272.services
 
+import com.ltcn272.config.PasswordHasher
 import com.ltcn272.data.model.User
 import com.ltcn272.data.model.UserAddress
 import com.ltcn272.data.repository.user.UserRepository
@@ -43,5 +44,12 @@ class UserService(private val userRepository: UserRepository) {
         } else {
             throw Exception("You are not admin")
         }
+    }
+    suspend fun updateUser(
+        userId: UUID,
+        fullName: String? = null,
+        phone: String? = null
+    ): Boolean {
+        return userRepository.updateUser(userId, fullName, phone)
     }
 }

@@ -1,4 +1,5 @@
 package com.ltcn272.data.model
+import com.ltcn272.config.PasswordHasher
 import com.ltcn272.data.model.serializer.LocalDateTimeSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
@@ -15,6 +16,29 @@ data class User(
     val provider : String = "LOCAL",
     @Serializable(with = LocalDateTimeSerializer::class) val createdAt: LocalDateTime = LocalDateTime.now()
 )
+
+@Serializable
+data class UserRequest(
+    val fullName: String,
+    val email: String,
+    val password: String,
+    val phone: String? = null,
+    val avatarUrl : String? = null,
+    val role: String = "CUSTOMER",
+    val provider : String = "LOCAL"
+) {
+    fun toUser(): User {
+        return User(
+            fullName = fullName,
+            email = email,
+            passwordHash = PasswordHasher.hashPassword(password),
+            phone = phone,
+            avatarUrl = avatarUrl,
+            role = role,
+            provider = provider
+        )
+    }
+}
 
 @Serializable
 data class RegisterRequest(
@@ -43,4 +67,10 @@ data class UserAddress(
     val state: String?,   // Tỉnh/Thành phố (Có thể là null)
     val country: String,  // Quốc gia
     val postalCode: String? // Mã bưu chính (Có thể là null)
+)
+
+@Serializable
+data class UpdateUserRequest(
+    val fullName: String? = null,
+    val phone: String? = null
 )

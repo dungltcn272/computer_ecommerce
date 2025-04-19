@@ -3,6 +3,7 @@ ktor:
     modules:
       - com.ltcn272.ApplicationKt.module
   deployment:
+    host: 0.0.0.0
     port: 8080
 app:
   baseUrl: "http://localhost:8080"
