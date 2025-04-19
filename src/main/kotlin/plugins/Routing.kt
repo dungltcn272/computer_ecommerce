@@ -40,12 +40,14 @@ fun Application.configureRouting() {
         val productService = ProductService(ProductRepositoryImpl(), userRepository)
         productRoutesPublic(productService)
         categoryRoutes(CategoryService(CategoryRepositoryImpl()))
+        val orderService =OrderService(OrderRepositoryImpl())
+        configurePayOSCallbackRoutes(orderService)
         get { call.respond("Hello Dung") }
         authenticate("auth-jwt", "auth-oauth-google") {
             userRoutes(UserService(userRepository))
             productRoutesForAdmin(productService)
             cartRoute(CartService(CartRepositoryImpl()))
-            orderRoutes(OrderService(OrderRepositoryImpl()))
+            orderRoutes(orderService)
         }
     }
 }

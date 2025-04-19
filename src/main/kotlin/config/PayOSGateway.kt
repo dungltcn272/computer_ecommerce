@@ -9,6 +9,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import org.apache.commons.codec.digest.HmacAlgorithms
+import org.apache.commons.codec.digest.HmacUtils
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -87,12 +89,6 @@ object PayOSGateway {
         )
     }
 
-    // Xác minh chữ ký webhook
-    fun verifyWebhookSignature(data: WebhookData): Boolean {
-        val dataString = "${data.orderId}|${data.amount}|${data.description}|${data.status}"
-        val signature = hmacSha256(CHECKSUM_KEY, dataString)
-        return signature == data.signature
-    }
 
     // Hàm mã hóa HMAC-SHA256
     private fun hmacSha256(key: String, data: String): String {

@@ -17,7 +17,6 @@ import java.math.RoundingMode
 import java.util.*
 
 fun Route.orderRoutes(orderService: OrderService) {
-    configurePayOSCallbackRoutes(orderService)
 
     route("/orders") {
         post {
@@ -125,7 +124,7 @@ fun Route.orderRoutes(orderService: OrderService) {
                 // Tạo link thanh toán
                 val paymentResponse = PayOSGateway.createPaymentLink(
                     orderCode = orderId,
-                    amount = amount,
+                    amount = 5000,
                     description = "Thanh toán đơn hàng #$orderId",
                     returnUrl = "$BASE_URL/success?orderId=$orderId",
                     cancelUrl = "$BASE_URL/cancel?orderId=$orderId",

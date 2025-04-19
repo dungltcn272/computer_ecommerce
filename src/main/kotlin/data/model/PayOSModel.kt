@@ -1,5 +1,6 @@
 package com.ltcn272.data.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -20,8 +21,8 @@ data class PaymentRequest(
 
 @Serializable
 data class PaymentResponse(
-    val checkoutUrl: String,
-    val orderId: Long,
+    val checkoutUrl: String?=null,
+    val orderId: Long?=null,
     val status: String
 )
 
@@ -49,10 +50,30 @@ data class PaymentData(
 )
 
 @Serializable
+data class WebhookResponse(
+    val code: String,
+    val desc: String,
+    val success: Boolean? = null,
+    val data: WebhookData,
+    val signature: String
+)
+
+@Serializable
 data class WebhookData(
-    val orderId: Long,
-    val status: String,
+    @SerialName("orderCode") val orderCode: Int,
     val amount: Int,
     val description: String,
-    val signature: String
+    @SerialName("accountNumber") val accountNumber: String,
+    val reference: String,
+    @SerialName("transactionDateTime") val transactionDateTime: String,
+    val currency: String,
+    @SerialName("paymentLinkId") val paymentLinkId: String,
+    val code: String,
+    val desc: String,
+    @SerialName("counterAccountBankId") val counterAccountBankId: String,
+    @SerialName("counterAccountBankName") val counterAccountBankName: String,
+    @SerialName("counterAccountName") val counterAccountName: String,
+    @SerialName("counterAccountNumber") val counterAccountNumber: String,
+    @SerialName("virtualAccountName") val virtualAccountName: String,
+    @SerialName("virtualAccountNumber") val virtualAccountNumber: String
 )

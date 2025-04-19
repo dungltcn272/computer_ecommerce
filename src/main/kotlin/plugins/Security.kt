@@ -2,6 +2,7 @@ package com.ltcn272.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.ltcn272.config.AppConfig.BASE_URL
 import com.ltcn272.config.AppConfig.jwtAudience
 import com.ltcn272.config.AppConfig.jwtDomain
 import com.ltcn272.config.AppConfig.jwtRealm
@@ -32,7 +33,7 @@ fun Application.configureSecurity() {
     }
     authentication {
         oauth("auth-oauth-google") {
-            urlProvider = { "http://localhost:8080/callback" }
+            urlProvider = { "$BASE_URL/callback" }
             providerLookup = {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = "google",
