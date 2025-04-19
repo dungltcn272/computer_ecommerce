@@ -6,7 +6,7 @@ import com.ltcn272.data.repository.order.OrderRepository
 import java.util.UUID
 
 class OrderService(private val orderRepository: OrderRepository) {
-    suspend fun createOrder(userId: UUID, items: List<OrderItemRequest>): Boolean {
+    suspend fun createOrder(userId: UUID, items: List<OrderItemRequest>): OrderResponse {
         return orderRepository.createOrder(userId, items)
     }
     suspend fun getOrdersByUser(userId: UUID): List<OrderResponse> {

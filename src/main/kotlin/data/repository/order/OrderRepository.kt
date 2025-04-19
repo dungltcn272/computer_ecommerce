@@ -5,7 +5,7 @@ import com.ltcn272.data.model.OrderResponse
 import java.util.UUID
 
 interface OrderRepository {
-    suspend fun createOrder(userId: UUID, items: List<OrderItemRequest>): Boolean
+    suspend fun createOrder(userId: UUID, items: List<OrderItemRequest>): OrderResponse
     suspend fun getOrdersByUser(userId: UUID): List<OrderResponse>
     suspend fun getOrderById(orderId: Long, userId: UUID): OrderResponse?
     suspend fun updateOrderStatus(orderId: Long, status: String, reason: String?): Boolean

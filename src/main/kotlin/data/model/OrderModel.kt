@@ -8,18 +8,9 @@ import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
 @Serializable
-data class OrderRequest(
-    val items: List<OrderItemRequest>,
-    @Serializable(with = BigDecimalSerializer::class) val totalPrice: BigDecimal,
-    val paymentStatus: String
-)
-
-@Serializable
 data class OrderItemRequest(
     val productId: Long,
-    val quantity: Int,
-    @Serializable(with = BigDecimalSerializer::class) val price: BigDecimal,
-    @Serializable(with = BigDecimalSerializer::class) val originalPrice: BigDecimal
+    val quantity: Int
 )
 
 @Serializable

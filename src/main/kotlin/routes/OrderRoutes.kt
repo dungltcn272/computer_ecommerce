@@ -5,15 +5,12 @@ import com.ltcn272.config.PayOSGateway
 import com.ltcn272.data.model.OrderCancelRequest
 import com.ltcn272.data.model.OrderItemRequest
 import com.ltcn272.data.model.OrderUpdateRequest
-import com.ltcn272.data.model.PaymentResponse
 import com.ltcn272.services.OrderService
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.util.*
 
 fun Route.orderRoutes(orderService: OrderService) {
@@ -23,15 +20,9 @@ fun Route.orderRoutes(orderService: OrderService) {
             val userId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
             val orderRequest = call.receive<List<OrderItemRequest>>()
 
-            val isSuccess = orderService.createOrder(userId, orderRequest)
+            val orderResponse = orderService.createOrder(userId, orderRequest)
 
-            if (isSuccess) {
-                call.respond(
-                    HttpStatusCode.Created, mapOf("message" to "Order created successfully")
-                )
-            } else {
-                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to create order"))
-            }
+            call.respond(HttpStatusCode.OK, orderResponse)
         }
         get {
             val userId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
