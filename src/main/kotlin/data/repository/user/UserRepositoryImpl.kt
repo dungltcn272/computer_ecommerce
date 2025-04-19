@@ -80,7 +80,7 @@ class UserRepositoryImpl : UserRepository {
 
     override suspend fun updateAddress(userId: UUID, address: UserAddress): Boolean = transaction {
         val updatedRows =
-            UserAddresses.update({ UserAddresses.id eq address.id!! and (UserAddresses.userId eq userId) }) {
+            UserAddresses.update({(UserAddresses.userId eq userId) }) {
                 it[UserAddresses.address] = address.address
                 it[city] = address.city
                 it[state] = address.state
@@ -90,14 +90,14 @@ class UserRepositoryImpl : UserRepository {
         updatedRows > 0
     }
 
-    override suspend fun removeAddress(userId: UUID, addressId: Long): Boolean = transaction {
+    override suspend fun removeAddress(userId: UUID): Boolean = transaction {
         val deletedRows =
-            UserAddresses.deleteWhere { UserAddresses.id eq addressId and (UserAddresses.userId eq userId) }
+            UserAddresses.deleteWhere {(UserAddresses.userId eq userId) }
         deletedRows > 0
     }
 
-    override suspend fun findAddressByUserId(userId: UUID): List<UserAddress> = transaction {
-        UserAddresses.selectAll().where { UserAddresses.userId eq userId }
+    override suspend fun findAddressByUserId(userId: UUID): UserAddress? = transaction {
+        UserAddresses.selectAll().where{ UserAddresses.userId eq userId }
             .map { row ->
                 UserAddress(
                     id = row[UserAddresses.id],
@@ -108,7 +108,7 @@ class UserRepositoryImpl : UserRepository {
                     country = row[UserAddresses.country],
                     postalCode = row[UserAddresses.postalCode]
                 )
-            }
+            }.singleOrNull()
     }
 
     override suspend fun deleteUser(userId: UUID): Boolean = transaction {

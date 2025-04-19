@@ -53,6 +53,10 @@ fun Route.userRoutes(userService: UserService) {
         val adminId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
         val userId = UUID.fromString(call.parameters["id"])
         val address = userService.adminGetUserAddress(userId, adminId)
+        if (address == null) {
+            call.respond(HttpStatusCode.NotFound, "Address not found")
+            return@get
+        }
         call.respond(HttpStatusCode.OK, address)
 
     }
@@ -62,6 +66,10 @@ fun Route.userRoutes(userService: UserService) {
         get("/address") {
             val userId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
             val address = userService.getAddress(userId)
+            if (address == null) {
+                call.respond(HttpStatusCode.NotFound, "Address not found")
+                return@get
+            }
             call.respond(HttpStatusCode.OK, address)
         }
 
@@ -75,6 +83,10 @@ fun Route.userRoutes(userService: UserService) {
         get("/address") {
             val userId = UUID.fromString(call.principal<UserIdPrincipal>()!!.name)
             val address = userService.getAddress(userId)
+            if (address == null) {
+                call.respond(HttpStatusCode.NotFound, "Address not found")
+                return@get
+            }
             call.respond(HttpStatusCode.OK, address)
         }
         put("/avatar") {
