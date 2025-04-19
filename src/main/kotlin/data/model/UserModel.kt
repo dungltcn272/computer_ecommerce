@@ -61,7 +61,7 @@ data class AuthResponse(
 @Serializable
 data class UserAddress(
     val id: Long? = null,  // ID của địa chỉ, sẽ auto increment trong cơ sở dữ liệu
-    val userId: String,     // ID người dùng, liên kết với người dùng trong bảng Users
+    val userId: String? = null,     // ID người dùng, liên kết với người dùng trong bảng Users
     val address: String,  // Địa chỉ
     val city: String,     // Thành phố
     val state: String?,   // Tỉnh/Thành phố (Có thể là null)
